@@ -17,6 +17,7 @@ use Mockery as m;
 use phpDocumentor\Reflection\DocBlock\Description;
 use phpDocumentor\Reflection\DocBlock\StandardTagFactory;
 use phpDocumentor\Reflection\DocBlock\Tag;
+use phpDocumentor\Reflection\DocBlock\Tags\InvalidTag;
 use phpDocumentor\Reflection\DocBlock\Tags\Method;
 use phpDocumentor\Reflection\DocBlock\Tags\MethodParameter;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
@@ -213,6 +214,32 @@ DOC;
                     [
                         new MethodParameter('integer', new Integer())
                     ]
+                ),
+            ],
+            $docblock->getTags()
+        );
+    }
+
+    public function testInvalidTypeParamResultsInInvalidTag(): void
+    {
+        $docCommment = '
+/**
+ * This is an example of a summary.
+ *
+ * @param array\Foo> $test
+ */
+';
+        $factory = DocBlockFactory::createInstance();
+        $docblock = $factory->create($docCommment);
+
+        self::assertEquals(
+            [
+                InvalidTag::create(
+                    'array\Foo> $test',
+                    'param',
+                )->withError(
+                    new \InvalidArgumentException(
+                        'Could not find type in array\Foo> $test, please check for malformed notations')
                 ),
             ],
             $docblock->getTags()

@@ -7,6 +7,7 @@ namespace phpDocumentor\Reflection\DocBlock\Tags\Factory;
 use Doctrine\Deprecations\Deprecation;
 use phpDocumentor\Reflection\DocBlock\DescriptionFactory;
 use phpDocumentor\Reflection\DocBlock\Tag;
+use phpDocumentor\Reflection\DocBlock\Tags\InvalidTag;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Context;
@@ -15,6 +16,7 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\OffsetAccessTypeNode;
 use Webmozart\Assert\Assert;
 
 use function sprintf;
@@ -58,6 +60,13 @@ final class ParamFactory implements PHPStanFactory
                 TypelessParamTagValueNode::class,
             ]
         );
+
+        if (($tagValue->type ?? null) instanceof OffsetAccessTypeNode) {
+            return InvalidTag::create(
+                (string) $tagValue,
+                'param'
+            );
+        }
 
         return new Param(
             trim($tagValue->parameterName, '$'),
