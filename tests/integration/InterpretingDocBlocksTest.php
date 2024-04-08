@@ -21,9 +21,13 @@ use phpDocumentor\Reflection\DocBlock\Tags\InvalidTag;
 use phpDocumentor\Reflection\DocBlock\Tags\Method;
 use phpDocumentor\Reflection\DocBlock\Tags\MethodParameter;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
+use phpDocumentor\Reflection\DocBlock\Tags\Return_;
 use phpDocumentor\Reflection\DocBlock\Tags\See;
+use phpDocumentor\Reflection\PseudoTypes\ConstExpression;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Integer;
+use phpDocumentor\Reflection\Types\Mixed_;
+use phpDocumentor\Reflection\Types\Self_;
 use phpDocumentor\Reflection\Types\String_;
 use phpDocumentor\Reflection\Types\Void_;
 use PHPUnit\Framework\TestCase;
@@ -241,6 +245,25 @@ DOC;
                     new \InvalidArgumentException(
                         'Could not find type in array\Foo> $test, please check for malformed notations')
                 ),
+            ],
+            $docblock->getTags()
+        );
+    }
+
+    public function testConstantReferenceTypes(): void
+    {
+        $docCommment = <<<DOC
+    /**
+     * @return self::STATUS_*
+     */
+DOC;
+
+        $factory = DocBlockFactory::createInstance();
+        $docblock = $factory->create($docCommment);
+
+        self::assertEquals(
+            [
+                new Return_(new ConstExpression(new Self_(), 'STATUS_*'), new Description('')),
             ],
             $docblock->getTags()
         );
