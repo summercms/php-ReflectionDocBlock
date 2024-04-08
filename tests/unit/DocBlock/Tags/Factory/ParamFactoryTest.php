@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace phpDocumentor\Reflection\DocBlock\Tags\Factory;
 
 use phpDocumentor\Reflection\DocBlock\Description;
+use phpDocumentor\Reflection\DocBlock\Tag;
+use phpDocumentor\Reflection\DocBlock\Tags\InvalidTag;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\PseudoTypes\IntegerValue;
@@ -33,7 +35,7 @@ final class ParamFactoryTest extends TagFactoryTestCase
      * @covers \phpDocumentor\Reflection\DocBlock\Tags\Factory\ParamFactory::supports
      * @dataProvider paramInputProvider
      */
-    public function testParamIsCreated(string $input, Param $expected): void
+    public function testParamIsCreated(string $input, Tag $expected): void
     {
         $ast = $this->parseTag($input);
         $factory = new ParamFactory($this->giveTypeResolver(), $this->givenDescriptionFactory());
@@ -121,6 +123,10 @@ final class ParamFactoryTest extends TagFactoryTestCase
                     new Description('My Description'),
                     false
                 ),
+            ],
+            [
+                '@param array[\Illuminate\Notifications\Channels\Notification] $notification',
+                InvalidTag::create('array[\Illuminate\Notifications\Channels\Notification] $notification', 'param'),
             ],
         ];
     }
