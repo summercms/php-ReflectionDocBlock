@@ -21,6 +21,7 @@ use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
+use RuntimeException;
 
 /**
  * Factory class creating tags using phpstan's parser
@@ -54,15 +55,19 @@ class AbstractPHPStanFactory implements Factory
             $context = new TypeContext('');
         }
 
-        foreach ($this->factories as $factory) {
-            if ($factory->supports($ast, $context)) {
-                return $factory->create($ast, $context);
+        try {
+            foreach ($this->factories as $factory) {
+                if ($factory->supports($ast, $context)) {
+                    return $factory->create($ast, $context);
+                }
             }
+        } catch (RuntimeException $e) {
+            return InvalidTag::create((string) $ast->value, 'method')->withError($e);
         }
 
         return InvalidTag::create(
-            $ast->name,
-            (string) $ast->value
+            (string) $ast->value,
+            $ast->name
         );
     }
 }
